@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>The World</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+    <style type="text/css">
+        td {
+            width: 200px;
+        }
+
+        img {
+            height: 150px;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            $('#productForm').submit(getCounrtyFromDB);
+        });
+
+        function getCounrtyFromDB() {
+            countryTB = $('#countryTB').val();
+            var apiCountry = "../api/Country/GetCountry/" + countryTB;
+            ajaxCall("GET", apiCountry, "", GetsuccessCB, GeterrorCB);
+            return false;
+        }
+
+        function GetsuccessCB(newCountryList) {
+            if (newCountryList[0] == null) {
+                alert("ops.. this country didnt found");
+            }
+            else if (newCountryList[0].Name == countryTB) {
+                var data = { 
+                    'id': newCountryList[0].Id,
+                    'name': newCountryList[0].Name,
+                    'continent': newCountryList[0].Continent,
+                    'lang': newCountryList[0].Lang,
+                }
+                localStorage["DataToPass"] = JSON.stringify(data);
+                window.location.href = 'countries.html';
+            }
+        }
+
+        function GeterrorCB(e) {
+            console.log(e);
+        }
+
+    </script>
+
+</head>
+
+<body>
+    <img src="world.jpg" />
+    <form id="productForm">
+        <h2>Welcome to the World</h2>
+        <table>
+            <tr>
+                <td>Name of the country</td>
+                <td>
+                    <input type="text" id="countryTB" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="submit" value="Enter" id="enter" />
+                    <div id="shir"></div>
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>
+

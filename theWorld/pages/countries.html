@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>The world</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="../scripts/ajaxCalls.js"></script>
+    <style type="text/css">
+        td {
+            width: 200px;
+        }
+
+        img {
+            height: 150px;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" />
+    <script type="text/javascript" src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script>
+        var oldData;
+        var first = true;
+        var table;
+        var cont_list;
+
+        $(document).ready(function () {
+            loadingCountry();
+            $('#countryForm').submit(updateData); 
+            $('#get_by_continent').click(getByContinent); 
+        });
+
+        function loadingCountry() {
+            oldData = JSON.parse(localStorage["DataToPass"]);
+            $("#nameC").html(oldData.name); 
+            $("#option select").val(oldData.continent);
+            $("#langTB").val(oldData.lang);
+
+        }
+
+        function updateData() {
+            update();
+            return false;
+        }
+        function update() {
+            newData = {
+                'Id': oldData.id,
+                'Name': $("#nameC").text(),
+                'Continent': $("#option select").val(),
+                'Lang': $("#langTB").val(),
+            }
+            var apiChange = "../api/country/update";
+            ajaxCall("PUT", apiChange, JSON.stringify(newData), PutsuccessCB, PuterrorCB);
+        }
+        function PutsuccessCB() {
+            console.log("success");
+
+        }
+        function PuterrorCB(e) {
+            console.log("error");
+
+        }
+
+        function getByContinent() {
+            continent = $("#option select").val();
+            var apiContinent = "../api/country/GetContinent/" + continent;
+            ajaxCall("GET", apiContinent, "", Get_cont_successCB, Get_cont_errorCB);
+        }
+
+        function Get_cont_successCB(continents) {
+            cont_list = continents;
+            $('#show').css('display', 'inline');
+
+            if (first) { 
+                table = $('#contTable').DataTable({
+                    data: cont_list, 
+                    columns: [
+                        { 'data': 'Id' },
+                        { 'data': 'Name' },
+                        { 'data': 'Lang' },
+                        { 'data': 'Continent' }
+                    ]
+                });
+            }
+            else {
+                table.clear(); 
+                for (var i = 0; i < cont_list.length; i++) {
+                    table.row.add(cont_list[i]);
+                }
+                table.draw();
+            }
+            first = false;
+        }
+        function Get_cont_errorCB() {
+            console.log("error");
+        }
+    </script>
+</head>
+
+<body>
+    <form id="countryForm">
+        <div>
+            <h2 id="nameC">The name of the country should be here</h2>
+            <table>
+                <tr>
+                    <td>langauge</td>
+                    <td>
+                        <input type="text" id="langTB"
+                               required
+                               pattern="[a-z]{2}"
+                               oninvalid="this.setCustomValidity('Should be two letters')"
+                               oninput="this.setCustomValidity('')" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>continent</td>
+                    <td id="option">
+                        <select id="cont">
+                            <option value="asia">asia</option>
+                            <option value="america">america</option>
+                            <option value="europe">europe</option>
+                            <option value="africe">africe</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="submit" value="Update" id="update" />
+                    </td>
+
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" value="get by continent" id="get_by_continent" />
+                    </td>
+                </tr>
+            </table>
+
+
+        </div>
+
+        <div id="show" class="container mb-3 mt-3" style="display: none">
+            <table id="contTable" class="table table-striped table-bordered" style="width:100%; border:0px">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Lang</th>
+                        <th>Continent</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+
+    </form>
+</body>
+</html>
+
